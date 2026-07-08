@@ -6,41 +6,45 @@ on:
   schedule:
     - cron: "0/30 * * * *"
   workflow_dispatch:
-  
+
+# Permissions required to deploy to GitHub Pages directly from Actions.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Serialize Pages deployments so runs never race each other.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-  build:
-    name: Build 
+  build-and-deploy:
+    name: Build and deploy
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          persist-credentials: false
-          fetch-depth: 0
+        uses: actions/checkout@v4
 
       - name: Build the website with the latest contents
         uses: ./action-build
         with:
           API_KEY: ${{ secrets.API_KEY }}
 
-      - name: Commit changed files
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add docs/\*
-          set +e
-          git status | grep 'modified\|new file'
-          if [ $? -eq 0 ]
-          then
-              set -e
-              git commit -am "build the website with the latest source data - $(date)"
-          else
-              set -e
-              echo "No changes since last run"
-          fi
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
 
-      - name: Push changes
-        uses: ad-m/github-push-action@v0.6.0
+      # The built site lives in docs/ inside the runner; it is uploaded and
+      # deployed directly to Pages, so nothing is committed back to the repo.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
