@@ -56,24 +56,33 @@ def row_to_dict(row, keys, start_at=0):
         i += 1
     return result_dict
 
+def is_empty_row(row):
+    # Google Sheets omits trailing empty cells, so a row may be short or empty.
+    # Treat a row with no value in its first column as a blank/junk row.
+    return not row or not str(row[0]).strip()
+
 def conv_website(table):
     items = {}
     for row in table:
+        if is_empty_row(row):
+            continue
         items[row[0]] = row[1] if len(row) > 1 else ''
     return items
 
 def conv_announcements(table):
     items = []
     for row in table:
-        if row[2]:
-            expire_at = dateutil.parser.parse(row[2]) 
+        if is_empty_row(row):
+            continue
+        if len(row) > 2 and row[2]:
+            expire_at = dateutil.parser.parse(row[2])
             now = datetime.now(timezone.utc)
             if expire_at <= now:
                 # This is already expired.
                 continue
         items.append({
             'title': row[0],
-            'content': row[1]
+            'content': row[1] if len(row) > 1 else ''
         })
     return items
 
@@ -81,6 +90,8 @@ def conv_members(table):
     groups = []
     group = None
     for row in table:
+        if is_empty_row(row):
+            continue
         title = row[0]
         if group is None or group['title'] != title:
             if group:
@@ -96,12 +107,14 @@ def conv_research(table):
     groups = []
     group = None
     for row in table:
+        if is_empty_row(row):
+            continue
         title = row[0]
         if group is None or group['title'] != title:
             if group:
                 groups.append(group)
             group = {'title': title, 'rows': []}
-        item = row_to_dict(row, ['title', 'authors', 'booktitle', 'links', 'tags'], 1)            
+        item = row_to_dict(row, ['title', 'authors', 'booktitle', 'links', 'tags'], 1)
         if 'tags' in item:
             item['tags'] = [tag.strip() for tag in (item['tags'] or '').split(',') if tag]
         group['rows'].append(item)
@@ -112,10 +125,12 @@ def conv_research(table):
 def conv_tags(table):
     tags = {}
     for row in table:
+        if is_empty_row(row):
+            continue
         tags[row[0]] = {
-            'title': row[1],
-            'tag': row[2],
-            'color': row[3],
+            'title': row[1] if len(row) > 1 else '',
+            'tag': row[2] if len(row) > 2 else '',
+            'color': row[3] if len(row) > 3 else '',
         }
     return tags
 
@@ -123,6 +138,8 @@ def conv_links(table):
     groups = []
     group = None
     for row in table:
+        if is_empty_row(row):
+            continue
         title = row[0]
         if group is None or group['title'] != title:
             if group:
