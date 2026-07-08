@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% block main %}
+{% set member_groups = groups if groups is defined else data.members %}
+{% set member_title = page_title if page_title is defined else 'Members' %}
 <div class="members">
-    {% with screen_background=data.website.members_background,screen_title='Members' %}
+    {% with screen_background=data.website.members_background,screen_title=member_title %}
     {% include 'screen.html' %}
     {% endwith %}
-    {% for group in data.members %}
+    {% for group in member_groups %}
     <div class="row">
         <div class="container">
             <div class="group v-padded">

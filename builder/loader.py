@@ -33,6 +33,9 @@ DEFAULT_MENU = [
     {'title': 'Links', 'url': '/links', 'children': []},
     {'title': 'Contact', 'url': '/contact', 'children': []},
 ]
+# Any spreadsheet tab named "Members - <Name>" becomes its own member page at
+# /members/<slug-of-name>, managed independently from the main Members tab.
+MEMBER_PAGE_PREFIX = 'Members - '
 
 def get_doc_id(data_url):
     tokens = data_url.split('/')
@@ -260,6 +263,44 @@ def load_menu(doc_id):
     menu = conv_menu(tables[0]) if tables else []
     return menu or DEFAULT_MENU
 
+def slugify(text):
+    text = (text or '').strip().lower()
+    text = re.sub(r'[^a-z0-9]+', '-', text)
+    return text.strip('-')
+
+def get_sheet_titles(doc_id):
+    url = '%s/%s?fields=sheets.properties.title&key=%s' % (SHEETS_URL_BASE, doc_id, config.API_KEY)
+    req = urllib.request.Request(url)
+    with urllib.request.urlopen(req, cafile=certifi.where()) as response:
+        data = response.read()
+    data_dict = json.loads(data)
+    return [s['properties']['title'] for s in data_dict.get('sheets', [])]
+
+def load_member_pages(doc_id):
+    pages = []
+    try:
+        titles = get_sheet_titles(doc_id)
+    except urllib.error.HTTPError:
+        return pages
+    for title in titles:
+        if not title.startswith(MEMBER_PAGE_PREFIX):
+            continue
+        name = title[len(MEMBER_PAGE_PREFIX):].strip()
+        slug = slugify(name)
+        if not name or not slug:
+            continue
+        try:
+            tables = load_ranges(doc_id, ["'%s'!A2:H" % title])
+        except urllib.error.HTTPError:
+            print('Error: unable to load member page tab "%s"' % title)
+            continue
+        pages.append({
+            'slug': slug,
+            'title': name,
+            'members': conv_members(tables[0]) if tables else [],
+        })
+    return pages
+
 def load_data():
     data_url = config.DATA_URL
     doc_id = get_doc_id(data_url)
@@ -275,5 +316,6 @@ def load_data():
         'redirects': conv_redirects(tables[7]),
         'personal': load_personal(tables[8]),
         'menu': load_menu(doc_id),
+        'member_pages': load_member_pages(doc_id),
     }
 

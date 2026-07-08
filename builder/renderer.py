@@ -26,6 +26,14 @@ def render_members(data):
     template = env.get_template('members.html')
     return template.render(data=data)
 
+def render_member_page(data, member_page):
+    template = env.get_template('members.html')
+    return template.render(
+        data=data,
+        groups=member_page['members'],
+        page_title=member_page['title'],
+    )
+
 def render_research(data):
     template = env.get_template('research.html')
     return template.render(data=data)

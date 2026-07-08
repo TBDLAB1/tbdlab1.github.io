@@ -23,7 +23,12 @@ def get_pages(data):
         Page('contact.html', render_contact),
     ] + [
         Page(
-            get_safe_path(page['path']), 
+            'members/%s.html' % member_page['slug'],
+            lambda_render_page_lists(data, member_page, func=render_member_page)
+        ) for member_page in data['member_pages']
+    ] + [
+        Page(
+            get_safe_path(page['path']),
             lambda_render_page_lists(data, page, func=render_page)
         ) for page in data['pages']
     ] + [
