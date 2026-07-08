@@ -24,6 +24,15 @@ PERSONAL_RANGES = [
     'Website!B2:C',
     'Contents!A2:B',
 ]
+MENU_RANGE = 'Menu!A2:C'
+# Used when the spreadsheet has no 'Menu' tab yet, so existing sites keep working.
+DEFAULT_MENU = [
+    {'title': 'Home', 'url': '/', 'children': []},
+    {'title': 'Members', 'url': '/members', 'children': []},
+    {'title': 'Research', 'url': '/research', 'children': []},
+    {'title': 'Links', 'url': '/links', 'children': []},
+    {'title': 'Contact', 'url': '/contact', 'children': []},
+]
 
 def get_doc_id(data_url):
     tokens = data_url.split('/')
@@ -43,7 +52,8 @@ def load_ranges(doc_id, ranges):
     with urllib.request.urlopen(req, cafile=certifi.where()) as response:
         data = response.read()
     data_dict = json.loads(data)
-    return [r['values'] for r in data_dict['valueRanges']]
+    # A range with no data omits the 'values' key, so default to an empty list.
+    return [r.get('values', []) for r in data_dict['valueRanges']]
 
 def row_to_dict(row, keys, start_at=0):
     i = start_at
@@ -216,6 +226,40 @@ def conv_redirects(table):
         redirects.append({'path': pathname, 'url': url})
     return redirects
 
+def conv_menu(table):
+    # Group rows by the first column (top-level label), following the same
+    # pattern as members/research/links. A row with an empty second column
+    # sets the top-level item's own link; rows with a second column become
+    # submenu items, which turns the top-level item into a dropdown.
+    groups = []
+    group = None
+    for row in table:
+        if is_empty_row(row):
+            continue
+        title = row[0].strip()
+        sub = row[1].strip() if len(row) > 1 else ''
+        url = row[2].strip() if len(row) > 2 else ''
+        if group is None or group['title'] != title:
+            if group:
+                groups.append(group)
+            group = {'title': title, 'url': '', 'children': []}
+        if sub:
+            group['children'].append({'title': sub, 'url': url})
+        else:
+            group['url'] = url
+    if group:
+        groups.append(group)
+    return groups
+
+def load_menu(doc_id):
+    try:
+        tables = load_ranges(doc_id, [MENU_RANGE])
+    except urllib.error.HTTPError:
+        # No 'Menu' tab in the spreadsheet yet.
+        return DEFAULT_MENU
+    menu = conv_menu(tables[0]) if tables else []
+    return menu or DEFAULT_MENU
+
 def load_data():
     data_url = config.DATA_URL
     doc_id = get_doc_id(data_url)
@@ -230,5 +274,6 @@ def load_data():
         'pages': conv_pages(tables[6]),
         'redirects': conv_redirects(tables[7]),
         'personal': load_personal(tables[8]),
+        'menu': load_menu(doc_id),
     }
 

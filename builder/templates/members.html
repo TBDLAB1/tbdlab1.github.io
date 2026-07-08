@@ -8,7 +8,7 @@
     <div class="row">
         <div class="container">
             <div class="group v-padded">
-                <h3 class="row-title">{{ group.title }}</h3>
+                <h3 class="row-title" id="{{ group.title|lower|replace(' ', '-')|replace('.', '') }}">{{ group.title }}</h3>
                 {% for member in group.members %}
                     {% if member.year %}
                         {% include 'member_alumnus.html' %}

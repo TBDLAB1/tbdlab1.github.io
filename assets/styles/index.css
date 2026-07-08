@@ -58,6 +58,7 @@ body {
     font-size: 1.3rem;
     font-weight: bold;
     color: var(--main-color);
+    scroll-margin-top: 6rem;
 }
 
 .row:nth-child(odd) {
