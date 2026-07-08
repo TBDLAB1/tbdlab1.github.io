@@ -1,4 +1,7 @@
 #!/bin/sh
+# Fail immediately if any command errors, so a broken build surfaces as a
+# failed workflow run instead of silently deploying stale content.
+set -e
 
 cd /github/workspace
 echo "Install Python dependencies..."
