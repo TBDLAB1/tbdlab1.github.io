@@ -16,7 +16,7 @@ permissions:
 # Serialize Pages deployments so runs never race each other.
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
