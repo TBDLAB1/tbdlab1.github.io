@@ -2,6 +2,10 @@ import os
 
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BUILD_PATH = os.path.join(BASE_PATH, 'docs')
-API_KEY = os.getenv('INPUT_API_KEY', '') or 'AIzaSyDOh00sVcAmUVoVcUWCJiRx5aIq40XJs3o'
 
-DATA_URL = 'https://docs.google.com/spreadsheets/d/1SaAs1CaSkPwv4Ktg4z0P7ETSZl1o7yW0qtFJakNh7lM/'
+# Secrets are injected by the Builder workflow as the API_KEY / DATA_URL action
+# inputs (exposed to the container as INPUT_API_KEY / INPUT_DATA_URL), so they
+# are never committed to the repository. For local builds, set them yourself:
+#   INPUT_API_KEY=... INPUT_DATA_URL=... python3 build.py
+API_KEY = os.getenv('INPUT_API_KEY', '')
+DATA_URL = os.getenv('INPUT_DATA_URL', '')
