@@ -92,17 +92,25 @@ Within each page, column A is still the section heading, so a single page can ho
 
 ## Gallery (photo albums from Google Drive)
 
-The `/gallery` page shows photo albums as slideshows. Each album is one row in a **`Gallery`** tab (columns `Title`, `Drive folder`, `Description`, from row 2):
+The `/gallery` page shows photo albums as slideshows. Photos live in **one Google Drive folder**, with **one subfolder per album**.
 
-| Title | Drive folder | Description (Markdown) |
+**Setup:**
+
+1. Make a Drive folder to hold all albums, share it *Anyone with the link – Viewer*, and inside it create **one subfolder per album** (e.g. `album1`, `album2`), each holding that album's photos.
+2. In the **`Website`** tab, add a `gallery_folder` key whose value is the **root folder's share link**.
+3. In a **`Gallery`** tab (from row 2), add one row per album:
+
+| Title | Folder | Description (Markdown) |
 | --- | --- | --- |
-| Jeju Conference | https://drive.google.com/drive/folders/FOLDER_ID | ## We had a great time … |
+| Jeju Conference | album1 | ## We had a great time … |
+| Workshop | album2 | |
 
-- **Photos live in Google Drive.** Put the album's photos in a Drive folder, share it *Anyone with the link – Viewer*, and paste the folder link in column B. **Every image in that folder becomes a slide** (ordered by file name).
-- Column A is the album title; column C is an optional Markdown description.
-- Add an album = add a row; add photos = drop files into the Drive folder. No per-photo editing.
-- Requirements: the `API_KEY` must have the **Google Drive API** enabled (in addition to Sheets), and the folder must be publicly viewable.
-- Link the page from the `Menu` tab (`Gallery → /gallery`).
+- **Title** (A) is what's shown on the page; **Folder** (B) is just the **subfolder name** inside the root folder; **Description** (C) is optional Markdown.
+- Every image in the subfolder becomes a slide (ordered by file name). Album order and titles are controlled by the sheet.
+- Add an album = add a subfolder + a sheet row; add photos = drop files into the subfolder.
+- (You can also put a full Drive folder link in column B instead of a name.)
+
+**Requirements:** the `API_KEY` must have the **Google Drive API** enabled (in addition to Sheets), the folders must be publicly viewable, and the page is linked from the `Menu` tab (`Gallery → /gallery`).
 
 ## Acknowledgements
 

@@ -83,6 +83,21 @@ def list_drive_images(folder_id):
         'url': 'https://drive.google.com/thumbnail?id=%s&sz=w1600' % f['id'],
     } for f in files if f.get('id')]
 
+def list_drive_subfolders(folder_id):
+    query = "'%s' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false" % folder_id
+    params = urllib.parse.urlencode({
+        'q': query,
+        'key': config.API_KEY,
+        'fields': 'files(id,name)',
+        'pageSize': 100,
+    })
+    url = '%s?%s' % (DRIVE_FILES_URL, params)
+    req = urllib.request.Request(url)
+    with urllib.request.urlopen(req, cafile=certifi.where()) as response:
+        data = response.read()
+    files = json.loads(data).get('files', [])
+    return {f['name']: f['id'] for f in files if f.get('id') and f.get('name')}
+
 def load_ranges(doc_id, ranges):
     if not config.API_KEY:
         raise RuntimeError('API_KEY is empty. Set the API_KEY secret (repo Settings -> Secrets and variables -> Actions).')
@@ -348,25 +363,45 @@ def load_member_pages(doc_id):
         })
     return pages
 
-def load_gallery(doc_id):
+def load_gallery(doc_id, root_folder_link=''):
     try:
         tables = load_ranges(doc_id, [GALLERY_RANGE])
     except urllib.error.HTTPError:
         # No 'Gallery' tab in the spreadsheet yet.
         return []
+    rows = tables[0] if tables else []
+
+    # Album folders are named subfolders inside the root gallery folder
+    # (Website tab 'gallery_folder'), so a row only needs the subfolder name.
+    subfolders = {}
+    root_id = get_drive_folder_id(root_folder_link)
+    if root_id:
+        try:
+            subfolders = list_drive_subfolders(root_id)
+        except urllib.error.HTTPError:
+            print('Error: cannot list the gallery root folder')
+
     albums = []
-    for row in (tables[0] if tables else []):
+    for row in rows:
         if is_empty_row(row):
             continue
         title = row[0].strip()
-        folder_id = get_drive_folder_id(row[1] if len(row) > 1 else '')
+        ref = (row[1] if len(row) > 1 else '').strip()
         content = row[2] if len(row) > 2 else ''
+        # A full Drive link is used as-is; otherwise treat the value as the
+        # name of a subfolder inside the root gallery folder.
+        if '/folders/' in ref or 'drive.google' in ref:
+            folder_id = get_drive_folder_id(ref)
+        else:
+            folder_id = subfolders.get(ref, '')
         photos = []
         if folder_id:
             try:
                 photos = list_drive_images(folder_id)
             except urllib.error.HTTPError:
                 print('Error: cannot list Drive folder for gallery album "%s"' % title)
+        elif ref:
+            print('Warning: gallery album "%s": folder "%s" not found in root' % (title, ref))
         albums.append({'title': title, 'content': content, 'photos': photos})
     return albums
 
@@ -374,8 +409,9 @@ def load_data():
     data_url = config.DATA_URL
     doc_id = get_doc_id(data_url)
     tables = load_ranges(doc_id, RANGES)
+    website = conv_website(tables[0])
     return {
-        'website': conv_website(tables[0]),
+        'website': website,
         'announcements': conv_announcements(tables[1]),
         'members': conv_members(tables[2]),
         'research': conv_research(tables[3]),
@@ -386,6 +422,6 @@ def load_data():
         'personal': load_personal(tables[8]),
         'menu': load_menu(doc_id),
         'member_pages': load_member_pages(doc_id),
-        'gallery': load_gallery(doc_id),
+        'gallery': load_gallery(doc_id, website.get('gallery_folder', '')),
     }
 
