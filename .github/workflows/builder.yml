@@ -4,7 +4,9 @@ on:
     branches:
       - master
   schedule:
-    - cron: "0/30 * * * *"
+    # Every 30 min, but offset from :00/:30 — those are peak times when
+    # scheduled runs pile up and hosted runners are hardest to acquire.
+    - cron: "17,47 * * * *"
   workflow_dispatch:
 
 # Permissions required to deploy to GitHub Pages directly from Actions.
