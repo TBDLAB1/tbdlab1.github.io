@@ -29,15 +29,21 @@ If you need to upload images or any other static files for use on the website, p
 
 1. Configure a custom domain for your website if you need to. Read [this document](https://docs.github.com/en/free-pro-team@latest/github/working-with-github-pages/configuring-a-custom-domain-for-your-github-pages-site) if you need help.
 
-1. Create a new Google Sheets document to store your website contents. Set `DATA_URL` value in the file *[builder/config.py](builder/config.py)*. Follow the instructions below for this.
+1. Create a Google Sheets document for your contents and add its URL as the `DATA_URL` secret (see below).
 
-1. Get a valid Google API key to use when downloading the website contents. Set the key as a encrypted secret `API_KEY`. Follow the instructions below for this.
+1. Get a Google API key and add it as the `API_KEY` secret (see below).
 
 1. Voilà! Once the workflow runs, your website is live on GitHub Pages.
 
+The spreadsheet URL and API key are read from the `DATA_URL` and `API_KEY` **repository secrets** (Settings → Secrets and variables → Actions), so they are never committed to the repo. For a local build, pass them as environment variables:
+
+```bash
+INPUT_API_KEY=<key> INPUT_DATA_URL=<sheet-url> python3 build.py
+```
+
 ### Create a data source document
 
-This project automatically downloads contents for the website from a Google Sheets document. Set URL of your document as a value for `DATA_URL` in the file *[builder/config.py](builder/config.py)*. 
+The site's contents come from a Google Sheets document, whose URL is stored in the `DATA_URL` secret.
 
 An example document is available at [here](https://docs.google.com/spreadsheets/d/1EDLlUuY2Ia5MKNbCTOftxxSxBaK3C9pRFOIUvMY30eY/edit?usp=sharing).
 
@@ -47,17 +53,15 @@ To create your own document, follow the instructions below.
 
 1. Set your document's sharing settings as: *Public on the web - Anyone on the Internet can find and view*. Read [this document](https://support.google.com/docs/answer/183965?co=GENIE.Platform%3DDesktop&hl=en) if you need help.
 
-1. Copy the URL of your document and paste in the file *[builder/config.py](builder/config.py)* as a value of `DATA_URL`.
+1. Add the document URL as the `DATA_URL` secret (Settings → Secrets and variables → Actions → New repository secret).
 
 ### Get a Google API Key
 
-The website builder in this project needs a valid Google API key to download website contents from the Google Sheets document. Add the key to the repository as a *encrypted secret* value `API_KEY`.
+The builder needs a Google API key to read the Google Sheets document. Add it as the `API_KEY` secret.
 
-1. Get an API key from [Google Developers Console](https://console.developers.google.com/). Read [this answer](https://stackoverflow.com/questions/46583052/http-google-sheets-api-v4-how-to-access-without-oauth-2-0/46583300#46583300) from a question in Stack Overflow to see how to create an API key and enable its use for Google Sheets APIs.
-
-1. Set your API key as a secret value `API_KEY`. Read [this doucment](https://docs.github.com/en/free-pro-team@latest/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository) to see how to add encrypted secrets for a GitHub repository.
-
-> **Important:** When the workflow runs, the `API_KEY` secret (if set) overrides the key in *[builder/config.py](builder/config.py)*. The key must have **no HTTP referrer restriction** (Google Cloud Console → your key → *Application restrictions* → **None**) and must have the **Google Sheets API** enabled. The builder calls the API server-side with no referrer, so a referrer-restricted key returns `403 PERMISSION_DENIED` and the build fails.
+1. Create an API key in the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and enable the **Google Sheets API** for its project.
+1. Set **Application restrictions → None** (no HTTP referrer restriction). The builder calls the API server-side with no referrer, so a referrer-restricted key fails with `403`.
+1. Add the key as the `API_KEY` secret.
 
 ## Configuring the navigation menu
 
