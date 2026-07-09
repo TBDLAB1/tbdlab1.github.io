@@ -105,7 +105,7 @@ The `/gallery` page shows photo albums as slideshows. Photos live in **one Googl
 | Jeju Conference | album1 | ## We had a great time … |
 | Workshop | album2 | |
 
-- **Title** (A) is what's shown on the page; **Folder** (B) is just the **subfolder name** inside the root folder; **Description** (C) is optional Markdown.
+- **Title** (A) is what's shown on the page; **Folder** (B) is just the **subfolder name** inside the root folder; **Description** (C) is optional Markdown. For line breaks in the description, press **Alt+Enter** in the cell (typing a literal `\n` also works).
 - Every image in the subfolder becomes a slide (ordered by file name). Album order and titles are controlled by the sheet.
 - Add an album = add a subfolder + a sheet row; add photos = drop files into the subfolder.
 - (You can also put a full Drive folder link in column B instead of a name.)

@@ -387,7 +387,9 @@ def load_gallery(doc_id, root_folder_link=''):
             continue
         title = row[0].strip()
         ref = (row[1] if len(row) > 1 else '').strip()
-        content = row[2] if len(row) > 2 else ''
+        # Allow a literal "\n" typed in the cell to act as a line break, in
+        # addition to real line breaks (Alt+Enter).
+        content = (row[2] if len(row) > 2 else '').replace('\\n', '\n')
         # A full Drive link is used as-is; otherwise treat the value as the
         # name of a subfolder inside the root gallery folder.
         if '/folders/' in ref or 'drive.google' in ref:
