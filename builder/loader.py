@@ -383,10 +383,14 @@ def load_gallery(doc_id, root_folder_link=''):
 
     albums = []
     for row in rows:
-        if is_empty_row(row):
+        if not row:
             continue
-        title = row[0].strip()
+        title = (row[0] if len(row) > 0 else '').strip()
         ref = (row[1] if len(row) > 1 else '').strip()
+        # Skip only fully empty rows; an album may have just a title, just a
+        # folder, or both.
+        if not title and not ref:
+            continue
         # Allow a literal "\n" typed in the cell to act as a line break, in
         # addition to real line breaks (Alt+Enter).
         content = (row[2] if len(row) > 2 else '').replace('\\n', '\n')

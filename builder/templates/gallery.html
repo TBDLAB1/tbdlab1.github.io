@@ -11,8 +11,10 @@
     <div class="row">
         <div class="container">
             <div class="album v-padded">
-                <h3 class="row-title">{{ album.title }}</h3>
-                {% if album.content %}
+                {% if album.title %}
+                <h3 class="row-title">{{ album.title | markdown_inline }}</h3>
+                {% endif %}
+                {% if album.content and album.content.strip() %}
                 <div class="album-content">{{ album.content | markdown }}</div>
                 {% endif %}
                 {% if album.photos %}

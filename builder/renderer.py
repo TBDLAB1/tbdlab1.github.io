@@ -11,7 +11,17 @@ def init_env():
         autoescape=select_autoescape(['html', 'xml'])
     )
     md = markdown.Markdown(extensions=['meta'])
-    env.filters['markdown'] = lambda text: Markup(md.convert(text))
+    env.filters['markdown'] = lambda text: Markup(md.reset().convert(text or ''))
+
+    def markdown_inline(text):
+        # Render Markdown but drop a single wrapping <p></p> so the result can
+        # sit inside an inline context such as a heading.
+        html = md.reset().convert(text or '')
+        if html[:3] == '<p>' and html[-4:] == '</p>' and html.count('<p>') == 1:
+            html = html[3:-4]
+        return Markup(html)
+    env.filters['markdown_inline'] = markdown_inline
+
     env.filters['jsonify'] = lambda text: json.dumps(text)
 
 def render_index(data):
