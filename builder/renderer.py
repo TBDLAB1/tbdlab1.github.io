@@ -63,6 +63,10 @@ def render_contact(data):
     template = env.get_template('contact.html')
     return template.render(data=data)
 
+def render_gallery(data):
+    template = env.get_template('gallery.html')
+    return template.render(data=data)
+
 def render_page(data, page):
     template = env.get_template('page.html')
     return template.render(data=data, title=page['title'], content=page['content'])

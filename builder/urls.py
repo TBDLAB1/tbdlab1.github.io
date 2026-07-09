@@ -21,6 +21,7 @@ def get_pages(data):
         Page('research.html', render_research),
         Page('links.html', render_links),
         Page('contact.html', render_contact),
+        Page('gallery.html', render_gallery),
     ] + [
         Page(
             'members/%s.html' % member_page['slug'],

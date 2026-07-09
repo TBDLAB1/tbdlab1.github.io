@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" href="/assets/styles/gallery.css">
+{% endblock %}
+{% block main %}
+<div class="gallery">
+    {% with screen_background=(data.website.gallery_background or data.website.members_background),screen_title='Gallery' %}
+    {% include 'screen.html' %}
+    {% endwith %}
+    {% for album in data.gallery %}
+    <div class="row">
+        <div class="container">
+            <div class="album v-padded">
+                <h3 class="row-title">{{ album.title }}</h3>
+                {% if album.content %}
+                <div class="album-content">{{ album.content | markdown }}</div>
+                {% endif %}
+                {% if album.photos %}
+                <div class="carousel" data-carousel>
+                    <button class="carousel-btn carousel-prev" data-carousel-prev aria-label="Previous">&lsaquo;</button>
+                    <div class="carousel-track" data-carousel-track>
+                        {% for photo in album.photos %}
+                        <div class="carousel-slide">
+                            <img src="{{ photo.url }}" alt="{{ photo.name }}" loading="lazy">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <button class="carousel-btn carousel-next" data-carousel-next aria-label="Next">&rsaquo;</button>
+                    <div class="carousel-dots" data-carousel-dots></div>
+                </div>
+                {% else %}
+                <div class="album-empty">No photos in this album yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<script src="/assets/scripts/gallery.js"></script>
+{% endblock %}

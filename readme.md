@@ -90,6 +90,20 @@ In addition to the combined */members* page (built from the `Members` tab), you 
 
 Within each page, column A is still the section heading, so a single page can hold several groups (e.g. a *Students* page with *Ph.D. Student*, *M.S. Student*, … sections).
 
+## Gallery (photo albums from Google Drive)
+
+The `/gallery` page shows photo albums as slideshows. Each album is one row in a **`Gallery`** tab (columns `Title`, `Drive folder`, `Description`, from row 2):
+
+| Title | Drive folder | Description (Markdown) |
+| --- | --- | --- |
+| Jeju Conference | https://drive.google.com/drive/folders/FOLDER_ID | ## We had a great time … |
+
+- **Photos live in Google Drive.** Put the album's photos in a Drive folder, share it *Anyone with the link – Viewer*, and paste the folder link in column B. **Every image in that folder becomes a slide** (ordered by file name).
+- Column A is the album title; column C is an optional Markdown description.
+- Add an album = add a row; add photos = drop files into the Drive folder. No per-photo editing.
+- Requirements: the `API_KEY` must have the **Google Drive API** enabled (in addition to Sheets), and the folder must be publicly viewable.
+- Link the page from the `Menu` tab (`Gallery → /gallery`).
+
 ## Acknowledgements
 
 This work was supported and funded by [JinYeong Bak](https://nosyu.github.io/). The developer of this repo is [Jeongmin Byun](https://jmbyun.github.io/).

@@ -9,6 +9,10 @@ from datetime import datetime, timezone
 from . import config
 
 SHEETS_URL_BASE = 'https://sheets.googleapis.com/v4/spreadsheets'
+DRIVE_FILES_URL = 'https://www.googleapis.com/drive/v3/files'
+# The Gallery tab maps an album (title + optional Markdown description) to a
+# Google Drive folder; every image in that folder becomes a slide.
+GALLERY_RANGE = 'Gallery!A2:C'
 RANGES = [
     'Website!B2:C',
     'Announcements!A2:C',
@@ -46,6 +50,38 @@ def get_doc_id(data_url):
             if len(token) > len(doc_id):
                 doc_id = token
     return doc_id
+
+def get_drive_folder_id(link):
+    link = (link or '').strip()
+    if not link:
+        return ''
+    m = re.search(r'/folders/([a-zA-Z0-9_-]+)', link)
+    if m:
+        return m.group(1)
+    # A bare id, or some other URL form: drop any query string and take the
+    # longest path segment.
+    link = link.split('?')[0]
+    tokens = [t for t in link.split('/') if t]
+    return max(tokens, key=len) if tokens else ''
+
+def list_drive_images(folder_id):
+    query = "'%s' in parents and mimeType contains 'image/' and trashed = false" % folder_id
+    params = urllib.parse.urlencode({
+        'q': query,
+        'key': config.API_KEY,
+        'fields': 'files(id,name)',
+        'orderBy': 'name_natural',
+        'pageSize': 100,
+    })
+    url = '%s?%s' % (DRIVE_FILES_URL, params)
+    req = urllib.request.Request(url)
+    with urllib.request.urlopen(req, cafile=certifi.where()) as response:
+        data = response.read()
+    files = json.loads(data).get('files', [])
+    return [{
+        'name': f.get('name', ''),
+        'url': 'https://drive.google.com/thumbnail?id=%s&sz=w1600' % f['id'],
+    } for f in files if f.get('id')]
 
 def load_ranges(doc_id, ranges):
     if not config.API_KEY:
@@ -312,6 +348,28 @@ def load_member_pages(doc_id):
         })
     return pages
 
+def load_gallery(doc_id):
+    try:
+        tables = load_ranges(doc_id, [GALLERY_RANGE])
+    except urllib.error.HTTPError:
+        # No 'Gallery' tab in the spreadsheet yet.
+        return []
+    albums = []
+    for row in (tables[0] if tables else []):
+        if is_empty_row(row):
+            continue
+        title = row[0].strip()
+        folder_id = get_drive_folder_id(row[1] if len(row) > 1 else '')
+        content = row[2] if len(row) > 2 else ''
+        photos = []
+        if folder_id:
+            try:
+                photos = list_drive_images(folder_id)
+            except urllib.error.HTTPError:
+                print('Error: cannot list Drive folder for gallery album "%s"' % title)
+        albums.append({'title': title, 'content': content, 'photos': photos})
+    return albums
+
 def load_data():
     data_url = config.DATA_URL
     doc_id = get_doc_id(data_url)
@@ -328,5 +386,6 @@ def load_data():
         'personal': load_personal(tables[8]),
         'menu': load_menu(doc_id),
         'member_pages': load_member_pages(doc_id),
+        'gallery': load_gallery(doc_id),
     }
 

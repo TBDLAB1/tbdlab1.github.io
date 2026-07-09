@@ -1,0 +1,94 @@
+.album-content {
+    margin-bottom: 1.5rem;
+    color: var(--grey-color);
+    line-height: 1.6;
+}
+.album-empty {
+    color: var(--grey-color);
+    font-style: italic;
+}
+
+.carousel {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.carousel-track {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    border-radius: 6px;
+    background-color: var(--light-grey-color);
+}
+.carousel-track::-webkit-scrollbar {
+    display: none;
+}
+.carousel-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+}
+.carousel-slide img {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+    display: block;
+}
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+.carousel-btn:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+.carousel-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+.carousel-prev {
+    left: 0.5rem;
+}
+.carousel-next {
+    right: 0.5rem;
+}
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+}
+.carousel-dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background-color: #cccccc;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.carousel-dot.active {
+    background-color: var(--main-color);
+}
