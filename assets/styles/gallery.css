@@ -1,7 +1,14 @@
+/* Tighten the gap between the album title and its description. */
+.album .row-title {
+    padding-bottom: 0.6rem;
+}
 .album-content {
     margin-bottom: 1.5rem;
     color: var(--grey-color);
     line-height: 1.6;
+}
+.album-content > :first-child {
+    margin-top: 0;
 }
 .album-empty {
     color: var(--grey-color);
