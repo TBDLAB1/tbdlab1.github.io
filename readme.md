@@ -1,26 +1,31 @@
 # Research Group Static Website
 
-This is a static website for a research group, hosted as GitHub Pages. 
+This is a static website for a research group, hosted as GitHub Pages.
 
-This website is designed to update its contents every 30 minutes based on a Google Sheets document with scheduled GitHub Actions jobs.
+The website rebuilds itself every 30 minutes from a Google Sheets document via a scheduled GitHub Actions job, so editing the spreadsheet is enough to update the site.
 
-![Builder](https://github.com/Human-Language-Intelligence/human-language-intelligence.github.io/workflows/Builder/badge.svg?branch=master)
+![Builder](https://github.com/TBDLAB1/tbdlab1.github.io/actions/workflows/builder.yml/badge.svg)
 
 ## How does this website work?
 
-This project is designed to update its website contents in *[docs](docs)* folder every 30 minutes with scheduled GitHub Actions jobs defined in this [file](.github/workflows/builder.yml). The website contents also get updated when you push something into the website. 
+The [Builder workflow](.github/workflows/builder.yml) runs the Python builder in *[builder](builder)*, which downloads the contents from Google Sheets and renders the static site into the *docs* folder **on the runner**. It then deploys that folder straight to GitHub Pages as an artifact — **nothing is committed back to the repository.**
 
-**Do NOT directly modify the contents in *[docs](docs)* folder**, since the contents of that folder gets auto-updated every 30 minutes.
+The workflow runs:
+- every 30 minutes (scheduled),
+- on every push to *master*, and
+- manually via the **Run workflow** button on the [Actions](https://github.com/TBDLAB1/tbdlab1.github.io/actions/workflows/builder.yml) page.
+
+> The *docs* folder is a build artifact — it is regenerated on every run and you do **not** need to commit it. To update the site, edit the Google Sheets document (or push a code change), then let the workflow run.
 
 ## How to upload static files to this website
 
-If you need to upload image files or any other static files to use in the website to this repository, please put your files in *[assets](assets)* folder. All files in the folder will be copied to *[docs/assets](docs/assets)* when other website contents get updated. 
+If you need to upload images or any other static files for use on the website, put them in the *[assets](assets)* folder. Everything there is copied into the built site's *assets* folder at build time.
 
 ## How to create your own website from this
 
 1. Fork this repository to your account.
 
-1. Configure the repository to publish a GitHub Pages site from a *docs* folder on the *master* branch. Read [this document](https://docs.github.com/en/enterprise/2.14/user/articles/configuring-a-publishing-source-for-github-pages#publishing-your-github-pages-site-from-a-docs-folder-on-your-master-branch) if you need help.
+1. Configure the repository to publish GitHub Pages using **GitHub Actions** as the source: *Settings → Pages → Build and deployment → Source → **GitHub Actions***. (This project deploys the built site as an artifact, so do **not** use "Deploy from a branch".)
 
 1. Configure a custom domain for your website if you need to. Read [this document](https://docs.github.com/en/free-pro-team@latest/github/working-with-github-pages/configuring-a-custom-domain-for-your-github-pages-site) if you need help.
 
@@ -28,7 +33,7 @@ If you need to upload image files or any other static files to use in the websit
 
 1. Get a valid Google API key to use when downloading the website contents. Set the key as a encrypted secret `API_KEY`. Follow the instructions below for this.
 
-1. Voilà! You have 
+1. Voilà! Once the workflow runs, your website is live on GitHub Pages.
 
 ### Create a data source document
 
@@ -52,6 +57,35 @@ The website builder in this project needs a valid Google API key to download web
 
 1. Set your API key as a secret value `API_KEY`. Read [this doucment](https://docs.github.com/en/free-pro-team@latest/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository) to see how to add encrypted secrets for a GitHub repository.
 
+> **Important:** When the workflow runs, the `API_KEY` secret (if set) overrides the key in *[builder/config.py](builder/config.py)*. The key must have **no HTTP referrer restriction** (Google Cloud Console → your key → *Application restrictions* → **None**) and must have the **Google Sheets API** enabled. The builder calls the API server-side with no referrer, so a referrer-restricted key returns `403 PERMISSION_DENIED` and the build fails.
+
+## Configuring the navigation menu
+
+The top navigation bar is driven by a **`Menu`** tab in the Google Sheets document (columns `Menu`, `Submenu`, `URL`, with data starting at row 2). Each row is one entry:
+
+| Menu | Submenu | URL |
+| --- | --- | --- |
+| Home | | / |
+| Members | PI | /members/pi |
+| Members | Students | /members/students |
+| Research | | /research |
+| Contact | | /contact |
+
+- Leave **Submenu** empty for a normal, one-level link (e.g. *Home*, *Research*).
+- Fill **Submenu** to turn that **Menu** label into a two-level dropdown; every row sharing the same **Menu** value becomes an item in that dropdown (e.g. *Members → PI / Students*).
+
+If there is no `Menu` tab, the site falls back to the default menu (Home, Members, Research, Links, Contact).
+
+## Creating separate member pages
+
+In addition to the combined */members* page (built from the `Members` tab), you can publish extra member pages, each managed in its own tab:
+
+1. Add a tab named **`Members - <Name>`** (e.g. `Members - PI`, `Members - Students`) using the **same columns as the `Members` tab**.
+1. It is automatically published at **`/members/<name>`**, where `<name>` is lower-cased with spaces turned into hyphens (`Members - PI` → `/members/pi`).
+1. Link to it from the `Menu` tab (see above).
+
+Within each page, column A is still the section heading, so a single page can hold several groups (e.g. a *Students* page with *Ph.D. Student*, *M.S. Student*, … sections).
+
 ## Acknowledgements
 
 This work was supported and funded by [JinYeong Bak](https://nosyu.github.io/). The developer of this repo is [Jeongmin Byun](https://jmbyun.github.io/).
@@ -62,5 +96,5 @@ This work was supported and funded by [JinYeong Bak](https://nosyu.github.io/). 
   - One empty line between lines
   - Reference: https://gist.github.com/shaunlebron/746476e6e7a4d698b373
 - How to update the webpage
-  - Go to [Actions](https://github.com/Human-Language-Intelligence/human-language-intelligence.github.io/actions?query=workflow%3ABuilder) page
-  - Click `Run workflow` button
+  - Edit the Google Sheets document (contents) or the *assets* folder (static files), then wait up to 30 minutes, **or**
+  - Go to the [Actions](https://github.com/TBDLAB1/tbdlab1.github.io/actions/workflows/builder.yml) page and click the `Run workflow` button to update immediately
