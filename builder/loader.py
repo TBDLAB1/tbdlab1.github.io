@@ -48,12 +48,23 @@ def get_doc_id(data_url):
     return doc_id
 
 def load_ranges(doc_id, ranges):
+    if not config.API_KEY:
+        raise RuntimeError('API_KEY is empty. Set the API_KEY secret (repo Settings -> Secrets and variables -> Actions).')
+    if not doc_id:
+        raise RuntimeError('DATA_URL is empty or has no document id. Set the DATA_URL secret to your Google Sheets URL.')
     params = '&'.join(['ranges=%s' % urllib.parse.quote(r) for r in ranges])
     url = '%s/%s/values:batchGet?%s&key=%s' % (SHEETS_URL_BASE, doc_id, params, config.API_KEY)
 
     req = urllib.request.Request(url)
-    with urllib.request.urlopen(req, cafile=certifi.where()) as response:
-        data = response.read()
+    try:
+        with urllib.request.urlopen(req, cafile=certifi.where()) as response:
+            data = response.read()
+    except urllib.error.HTTPError as e:
+        # urllib hides the response body; print Google's actual error reason
+        # (e.g. API_KEY_HTTP_REFERRER_BLOCKED, SERVICE_DISABLED, API_KEY_INVALID).
+        body = e.read().decode('utf-8', 'replace')
+        print('Google Sheets API returned HTTP %s. Response body:\n%s' % (e.code, body))
+        raise
     data_dict = json.loads(data)
     # A range with no data omits the 'values' key, so default to an empty list.
     return [r.get('values', []) for r in data_dict['valueRanges']]
