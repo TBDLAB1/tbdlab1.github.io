@@ -14,9 +14,11 @@ permissions:
   id-token: write
 
 # Serialize Pages deployments so runs never race each other.
+# Pages deployments must not be cancelled mid-flight (that can leave the
+# github-pages environment locked), so queue runs instead of cancelling.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
