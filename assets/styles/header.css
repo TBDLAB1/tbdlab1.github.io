@@ -84,6 +84,34 @@
     color: var(--text-color);
 }
 
+/* Mobile menu toggle (hamburger) — hidden on desktop, shown under 48rem */
+.header-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+.header-toggle span {
+    display: block;
+    width: 1.5rem;
+    height: 2px;
+    border-radius: 2px;
+    background-color: var(--white-color);
+    transition: transform 0.3s ease, opacity 0.2s ease, background-color 1s ease;
+}
+.header-scrolled .header-toggle span {
+    background-color: var(--text-color);
+}
+.header.nav-open .header-toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.header.nav-open .header-toggle span:nth-child(2) { opacity: 0; }
+.header.nav-open .header-toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
 /* Two-level (dropdown) menu */
 .header-dropdown {
     position: relative;
@@ -134,42 +162,96 @@
 
 @media screen and (max-width: 48rem) {
     .header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 5.5rem;
-        margin: 0;
-        padding: 0;
-        z-index: 998;
-        transition: height 1s ease, background-color 1s ease;
+        height: 3.75rem;
     }
     .header-scrolled {
-        height: 5.5rem;
+        height: 3.75rem;
         background-color: var(--header-scrolled-bg-color);
         border-bottom: 1px solid var(--light-grey-color);
     }
     .header-content {
-        display: flex;
-        padding: 0.5rem 0.5rem;
+        flex-direction: row;
+        justify-content: space-between;
         align-items: center;
-        flex-direction: column;
-        border-bottom: 1px solid var(--header-border-color);
+        padding: 0 0.75rem;
+        border-bottom: none;
+        position: relative;
     }
-    .header-menu {
-        flex: 1 1 auto;
+    .header-toggle {
         display: flex;
-        align-items: center;
-        justify-content: flex-end;
+    }
+    /* While the panel is open, give the top bar a solid look. */
+    .header.nav-open {
+        background-color: var(--white-color);
+    }
+    .header.nav-open .logo-text {
+        color: var(--text-color);
+    }
+    .header.nav-open .header-toggle span {
+        background-color: var(--text-color);
+    }
+    /* The menu becomes a dropdown panel below the bar. */
+    .header-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding: 0.25rem 0;
+        background-color: var(--white-color);
+        border-bottom: 1px solid var(--light-grey-color);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.14);
+        max-height: calc(100vh - 3.75rem);
+        overflow-y: auto;
+    }
+    .header.nav-open .header-menu {
+        display: flex;
     }
     .header-menu-item {
-        padding: 0.2rem 0.5rem;
-        text-decoration: none;
-        color: var(--header-text-color);
-        font-size: 0.7rem;
-        font-weight: bold;
-        text-transform: uppercase;
+        display: block;
+        padding: 0.85rem 1.25rem;
+        color: var(--text-color);
+        font-size: 0.8rem;
         letter-spacing: 1px;
-        transition: color 1s ease;
+    }
+    .header-scrolled .header-menu-item {
+        color: var(--text-color);
+    }
+    .header-menu-item:hover {
+        color: var(--link-color);
+    }
+    /* Dropdowns become inline accordions (tap to expand). */
+    .header-dropdown {
+        display: block;
+        position: static;
+    }
+    .header-menu-item.header-dropdown-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .header-submenu {
+        display: none;
+        position: static;
+        min-width: 0;
+        padding: 0;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        background-color: var(--light-grey-color);
+    }
+    .header-dropdown:hover .header-submenu,
+    .header-dropdown:focus-within .header-submenu {
+        display: none;
+    }
+    .header-dropdown.open .header-submenu {
+        display: block;
+    }
+    .header-submenu-item {
+        padding: 0.75rem 1.25rem 0.75rem 2.25rem;
+        font-size: 0.75rem;
     }
 }

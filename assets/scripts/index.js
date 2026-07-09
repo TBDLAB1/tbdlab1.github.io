@@ -2,15 +2,35 @@ function handleScroll() {
     window.__store__ = window.__store__ || {};
     var top = window.scrollY;
     var threshold = 30;
+    // Use classList (not className=) so other state like nav-open survives.
     if (!window.__store__.scrolled && top > threshold) {
         window.__store__.scrolled = true;
-        document.getElementById('header').className = 'header header-scrolled';
+        document.getElementById('header').classList.add('header-scrolled');
     } else if (window.__store__.scrolled && top <= threshold) {
         window.__store__.scrolled = false;
-        document.getElementById('header').className = 'header';
+        document.getElementById('header').classList.remove('header-scrolled');
     }
 }
 window.addEventListener('scroll', handleScroll);
+
+// Mobile: toggle the menu panel open/closed with the hamburger button.
+function setupNavToggle() {
+    var header = document.getElementById('header');
+    var toggle = header && header.querySelector('[data-nav-toggle]');
+    if (!header || !toggle) return;
+    function setOpen(open) {
+        header.classList.toggle('nav-open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    toggle.addEventListener('click', function () {
+        setOpen(!header.classList.contains('nav-open'));
+    });
+    // Close the panel after tapping an actual navigation link.
+    header.querySelectorAll('.header-menu a').forEach(function (a) {
+        a.addEventListener('click', function () { setOpen(false); });
+    });
+}
+setupNavToggle();
 
 // Two-level menu: tap/click a dropdown label to toggle its submenu (touch devices).
 function setupDropdowns() {
