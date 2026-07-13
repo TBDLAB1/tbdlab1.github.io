@@ -19,6 +19,7 @@ def get_pages(data):
         Page('index.html', render_index),
         Page('members.html', render_members),
         Page('research.html', render_research),
+        Page('publications.html', render_publications),
         Page('links.html', render_links),
         Page('contact.html', render_contact),
         Page('gallery.html', render_gallery),

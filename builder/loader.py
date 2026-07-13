@@ -13,11 +13,14 @@ DRIVE_FILES_URL = 'https://www.googleapis.com/drive/v3/files'
 # The Gallery tab maps an album (title + optional Markdown description) to a
 # Google Drive folder; every image in that folder becomes a slide.
 GALLERY_RANGE = 'Gallery!A2:C'
+# The 'Publications' tab holds the paper list (same layout the 'Research' tab
+# used to have); the 'Research' tab is now a research-introduction page.
+PUBLICATIONS_RANGE = 'Publications!A2:F'
+RESEARCH_RANGE = 'Research!A2:C'
 RANGES = [
     'Website!B2:C',
     'Announcements!A2:C',
     'Members!A2:H',
-    'Research!A2:F',
     'Tags!A2:F',
     'Links!A2:G',
     'Pages!A2:C',
@@ -411,6 +414,34 @@ def load_gallery(doc_id, root_folder_link=''):
         albums.append({'title': title, 'content': content, 'photos': photos})
     return albums
 
+def conv_research_intro(table):
+    # Research-introduction page: one row per topic (title, image, Markdown).
+    items = []
+    for row in table:
+        if not row:
+            continue
+        title = (row[0] if len(row) > 0 else '').strip()
+        image = (row[1] if len(row) > 1 else '').strip()
+        content = (row[2] if len(row) > 2 else '').replace('\\n', '\n')
+        if not title and not image and not content.strip():
+            continue
+        items.append({'title': title, 'image': image, 'content': content})
+    return items
+
+def load_publications(doc_id):
+    try:
+        tables = load_ranges(doc_id, [PUBLICATIONS_RANGE])
+    except urllib.error.HTTPError:
+        return []
+    return conv_research(tables[0]) if tables else []
+
+def load_research_intro(doc_id):
+    try:
+        tables = load_ranges(doc_id, [RESEARCH_RANGE])
+    except urllib.error.HTTPError:
+        return []
+    return conv_research_intro(tables[0]) if tables else []
+
 def load_data():
     data_url = config.DATA_URL
     doc_id = get_doc_id(data_url)
@@ -420,12 +451,13 @@ def load_data():
         'website': website,
         'announcements': conv_announcements(tables[1]),
         'members': conv_members(tables[2]),
-        'research': conv_research(tables[3]),
-        'tags': conv_tags(tables[4]),
-        'links': conv_links(tables[5]),
-        'pages': conv_pages(tables[6]),
-        'redirects': conv_redirects(tables[7]),
-        'personal': load_personal(tables[8]),
+        'tags': conv_tags(tables[3]),
+        'links': conv_links(tables[4]),
+        'pages': conv_pages(tables[5]),
+        'redirects': conv_redirects(tables[6]),
+        'personal': load_personal(tables[7]),
+        'publications': load_publications(doc_id),
+        'research': load_research_intro(doc_id),
         'menu': load_menu(doc_id),
         'member_pages': load_member_pages(doc_id),
         'gallery': load_gallery(doc_id, website.get('gallery_folder', '')),

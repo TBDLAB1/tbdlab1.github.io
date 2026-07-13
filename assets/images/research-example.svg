@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500" role="img" aria-label="Research example image">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1f5a73"/>
+      <stop offset="1" stop-color="#4a90a4"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.72" cy="0.28" r="0.7">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#bg)"/>
+  <rect width="800" height="500" fill="url(#glow)"/>
+
+  <!-- soft bokeh -->
+  <circle cx="120" cy="380" r="90" fill="#ffffff" opacity="0.06"/>
+  <circle cx="700" cy="120" r="130" fill="#ffffff" opacity="0.05"/>
+  <circle cx="620" cy="430" r="50" fill="#ffffff" opacity="0.07"/>
+
+  <!-- atom motif -->
+  <g transform="translate(400 235)" stroke="#ffffff" fill="none" opacity="0.85">
+    <g stroke-width="3">
+      <ellipse rx="120" ry="46"/>
+      <ellipse rx="120" ry="46" transform="rotate(60)"/>
+      <ellipse rx="120" ry="46" transform="rotate(120)"/>
+    </g>
+    <circle r="13" fill="#ffffff" stroke="none"/>
+  </g>
+
+  <!-- label -->
+  <text x="400" y="410" text-anchor="middle" font-family="Lato, Arial, sans-serif"
+        font-size="30" letter-spacing="8" fill="#ffffff" opacity="0.92">RESEARCH</text>
+</svg>

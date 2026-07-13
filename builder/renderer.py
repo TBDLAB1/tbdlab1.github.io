@@ -27,7 +27,8 @@ def init_env():
 def render_index(data):
     template = env.get_template('landing.html')
     max_size = 7
-    landing_research = data['research'][0]['rows'][:]
+    publications = data['publications']
+    landing_research = publications[0]['rows'][:] if publications else []
     if len(landing_research) > max_size:
         landing_research = landing_research[:max_size]
     return template.render(data=data, landing_research=landing_research)
@@ -43,6 +44,10 @@ def render_member_page(data, member_page):
         groups=member_page['members'],
         page_title=member_page['title'],
     )
+
+def render_publications(data):
+    template = env.get_template('publications.html')
+    return template.render(data=data)
 
 def render_research(data):
     template = env.get_template('research.html')

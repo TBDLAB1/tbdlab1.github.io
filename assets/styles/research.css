@@ -1,0 +1,21 @@
+.research-intro-item .row-title {
+    padding-bottom: 0.9rem;
+}
+.research-intro-image {
+    display: block;
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: 6px;
+    margin: 0 0 1.25rem 0;
+    background-color: var(--light-grey-color);
+}
+.research-intro-content {
+    color: var(--grey-color);
+    line-height: 1.7;
+    max-width: 46rem;
+}
+.research-intro-content > :first-child {
+    margin-top: 0;
+}

@@ -112,6 +112,17 @@ The `/gallery` page shows photo albums as slideshows. Photos live in **one Googl
 
 **Requirements:** the `API_KEY` must have the **Google Drive API** enabled (in addition to Sheets), the folders must be publicly viewable, and the page is linked from the `Menu` tab (`Gallery → /gallery`).
 
+## Research & Publications
+
+- **Publications** (`/publications`) is the paper list — built from a **`Publications`** tab (same layout the old `Research` tab used: `Category`, `Title`, `Authors`, `Booktitle`, `Links`, `Tags`).
+- **Research** (`/research`) is an introduction page — built from a **`Research`** tab with one row per topic:
+
+| Title | Image | Content (Markdown) |
+| --- | --- | --- |
+| Natural Language Processing | /assets/images/research-example.svg | We study … |
+
+Each row renders as a **title + one image (16:10) + Markdown description**, repeated down the page. The image is any URL or path (a repo asset, a Drive `thumbnail?id=…` link, etc.); a sample 16:10 image lives at `/assets/images/research-example.svg`. Link both pages from the `Menu` tab.
+
 ## Acknowledgements
 
 This work was supported and funded by [JinYeong Bak](https://nosyu.github.io/). The developer of this repo is [Jeongmin Byun](https://jmbyun.github.io/).
